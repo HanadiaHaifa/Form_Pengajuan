@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Form Pengajuan Kendaraan Karyawan</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root{
+    --accent:#e85a2e;
+    --bg:#fff7f7;
+    --card:#ffffff;
+    --border:#eadcdc;
+    --muted:#7d7272;
+    --label-gap:6px;
+    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body{height:100%;}
+  body{
+    margin:0;
+    padding:30px 16px;
+    background:var(--bg);
+    display:block;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .container{
+    width:100%;
+    max-width:980px;
+    background:var(--card);
+    border-radius:12px;
+    padding:28px;
+    box-shadow:0 8px 30px rgba(17,12,12,0.06);
+    border:1px solid #f1e7e7;
+    margin:0 auto;
+  }
+  h1{ margin:0 0 6px 0; font-size:20px; font-weight:800; }
+  .subtitle{ margin:0 0 18px 0; color:var(--muted); font-size:13.5px; }
+
+  form{ margin-top:6px; }
+
+  .field{ margin-bottom:22px; }
+  .field-top{ display:flex; align-items:flex-start; gap:var(--label-gap); margin-bottom:8px; }
+  .field-number{ width:32px; min-width:32px; color:var(--accent); font-weight:800; font-size:15px; padding-top:2px; }
+  .field-label{ font-size:14px; font-weight:700; color:#2e2a2a; margin:0; }
+  .required-star{ color:var(--accent); margin-left:6px; font-weight:800; font-size:13px; }
+
+  .control{ text-align:left; position:relative; }
+  .control input,
+  .control select,
+  .control textarea{
+    width:100%;
+    padding:12px 14px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    font-size:14px;
+    background:#fff;
+    box-sizing:border-box;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  textarea{ min-height:96px; resize:vertical; }
+  .control input:focus, .control select:focus, .control textarea:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(232,90,46,0.08);
+  }
+
+  .date-wrap{ position:relative; }
+  .date-wrap input[type="date"]{ padding-right:44px; }
+  .date-btn{ position:absolute; right:8px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:transparent; border:none; cursor:pointer; padding:4px; }
+  .date-btn svg{ width:18px; height:18px; opacity:0.9; }
+  input[type="date"]::-webkit-calendar-picker-indicator{ opacity:0.0; width:0; height:0; }
+
+  select{
+    appearance:none;
+    -webkit-appearance:none;
+    background-image: linear-gradient(45deg, transparent 50%, #a9a9a9 50%), linear-gradient(135deg, #a9a9a9 50%, transparent 50%);
+    background-position: calc(100% - 16px) calc(1em + 2px), calc(100% - 11px) calc(1em + 2px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right:38px;
+  }
+
+  .radio-group{ display:flex; flex-direction:column; gap:10px; margin-top:6px; align-items:flex-start; }
+  .radio-item{ display:flex; align-items:center; gap:12px; font-size:14px; color:#2f2b2b; cursor:pointer; }
+  .radio-item input[type="radio"]{ width:18px; height:18px; margin:0; accent-color:var(--accent); }
+
+  .actions{ display:flex; justify-content:flex-end; gap:12px; margin-top:8px; }
+  button.btn{ padding:10px 16px; border-radius:10px; border:none; font-weight:700; cursor:pointer; }
+  button.primary{ background:var(--accent); color:white; box-shadow:0 8px 20px rgba(232,90,46,0.14); }
+  button.ghost{ background:transparent; border:1px solid #e9d6d6; color:#4e4545; }
+
+  .error-msg{ color:#c0392b; font-size:13px; margin-top:6px; display:none; }
+  .error-msg.show{ display:block; }
+
+  @media (max-width:600px){
+    .field-number{ width:28px; min-width:28px; font-size:14px; }
+    .container{ padding:18px; border-radius:10px; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>FORMULIR PENGAJUAN KENDARAAN KARYAWAN (CLASS 7SPV - 8SPV)</h1>
+    <p class="subtitle">Isilah formulir berikut dengan lengkap. Field bertanda * wajib diisi.</p>
+
+    <form id="formPengajuan" onsubmit="handleSubmit(event)" novalidate>
+
+      <!-- 1 Nama Lengkap (hanya huruf & spasi) -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">1.</div>
+          <div class="field-label">Nama Lengkap <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <input id="namaLengkap" type="text" name="nama_lengkap" placeholder="Masukkan nama lengkap" required
+                 pattern="^[A-Za-z\u00C0-\u017F\s'-]+$"
+                 title="Gunakan huruf dan spasi saja (tanpa angka atau simbol)">
+          <div id="namaError" class="error-msg">Hanya huruf dan spasi yang diperbolehkan.</div>
+        </div>
+      </div>
+
+      <!-- 2 Noreg -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">2.</div>
+          <div class="field-label">Noreg <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <input type="number" name="noreg" placeholder="Nilai harus berupa angka" required>
+        </div>
+      </div>
+
+      <!-- 3 Divisi -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">3.</div>
+          <div class="field-label">Divisi <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <select name="divisi" required>
+            <option value="">-- Pilih Divisi --</option>
+            <option>APPD</option>
+            <option>CCD</option>
+            <option>CPLOD</option>
+            <option>EAD</option>
+            <option>EMD</option>
+            <option>EPKD</option>
+            <option>EPSD</option>
+            <option>FD</option>
+            <option>GAD</option>
+            <option>HRD</option>
+            <option>IAD</option>
+            <option>ILPD</option>
+            <option>ISTD</option>
+            <option>OMDD</option>
+            <option>PAD</option>
+            <option>PBMD</option>
+            <option>PBOD</option>
+            <option>PCD</option>
+            <option>PETD</option>
+            <option>PuD</option>
+            <option>PWPD</option>
+            <option>QD</option>
+            <option>TGAO</option>
+            <option>TIA</option>
+            <option>VPLD</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4 Email (wajib domain @toyota.co.id) -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">4.</div>
+          <div class="field-label">Alamat Email <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <input id="emailField" type="email" name="email" placeholder="nama@toyota.co.id" required
+                 pattern="^[a-zA-Z0-9._%+\-]+@toyota\.co\.id$"
+                 title="Gunakan alamat email dengan domain @toyota.co.id">
+          <div id="emailError" class="error-msg">Email harus berakhiran <strong>@toyota.co.id</strong>.</div>
+        </div>
+      </div>
+
+      <!-- 5 No. Telp (WA) [HANYA ANGKA] -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">5.</div>
+          <div class="field-label">No. Telp (WA) <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <!-- pattern: 6-20 digit -->
+          <input id="phoneField" type="tel" name="phone" placeholder="08xxxxxxxxxx" required
+                 pattern="^[0-9]{6,20}$" title="Masukkan 6–20 digit, hanya angka.">
+          <div id="phoneError" class="error-msg">Nomor telepon harus berisi 6–20 digit (angka saja).</div>
+        </div>
+      </div>
+
+      <!-- 6 Tahun Promosi ke VII SPV (date) -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">6.</div>
+          <div class="field-label">Tahun Promosi ke VII SPV <span class="required-star">*</span></div>
+        </div>
+        <div class="control date-wrap">
+          <input type="date" name="promosi_vii_spv" required>
+          <button type="button" class="date-btn" aria-label="Buka kalender" onclick="openPicker('promosi_vii_spv')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#6b5b5b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 7 Kelas saat ini -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">7.</div>
+          <div class="field-label">Kelas saat ini <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <select name="kelas_saat_ini" required>
+            <option value="">-- Pilih Kelas --</option>
+            <option>VII SPV</option>
+            <option>VIII SPV</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 8 Service in Class -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">8.</div>
+          <div class="field-label">Service in Class <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <select name="service_in_class" required>
+            <option value="">-- Pilih Lama Service --</option>
+            <option value="0">0 tahun</option>
+            <option value="1">1 tahun</option>
+            <option value="2">2 tahun</option>
+            <option value="3">3 tahun</option>
+            <option value="4">4 tahun</option>
+            <option value=">4">&gt; 4 tahun</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 9 Tahun Pensiun (date) -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">9.</div>
+          <div class="field-label">Tahun Pensiun <span class="required-star">*</span></div>
+        </div>
+        <div class="control date-wrap">
+          <input type="date" name="retirement_date" required>
+          <button type="button" class="date-btn" aria-label="Buka kalender" onclick="openPicker('retirement_date')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#6b5b5b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 10 Model dan Tipe Kendaraan -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">10.</div>
+          <div class="field-label">Model dan Tipe Kendaraan <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <select name="model_tipe" required>
+            <option value="">-- Pilih Model & Tipe --</option>
+            <option>Agya 1.2 G M/T</option>
+            <option>Agya 1.2 G CVT</option>
+            <option>Agya Stylix 1.2 G CVT</option>
+            <option>Calya 1.2 G M/T</option>
+            <option>Calya 1.2 G A/T</option>
+            <option>Raize 1.2 G CVT One Tone</option>
+            <option>Raize 1.0T G CVT One Tone</option>
+            <option>Avanza 1.3 E M/T</option>
+            <option>Avanza 1.3 E CVT</option>
+            <option>Avanza 1.5 G M/T</option>
+            <option>Avanza 1.5 G CVT</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 11 Warna Eksterior -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">11.</div>
+          <div class="field-label">Warna Eksterior <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <input type="text" name="warna_eksterior" placeholder="Contoh: Putih / Hitam / Silver" required>
+        </div>
+      </div>
+
+      <!-- 12 Keterangan -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">12.</div>
+          <div class="field-label">Keterangan</div>
+        </div>
+        <div class="control">
+          <textarea name="keterangan" placeholder="Keterangan tambahan (opsional)"></textarea>
+        </div>
+      </div>
+
+      <!-- 13 Metode Pembayaran -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">13.</div>
+          <div class="field-label">Metode Pembayaran</div>
+        </div>
+        <div class="control" aria-hidden="false">
+          <div class="radio-group" role="radiogroup" aria-label="Metode Pembayaran">
+            <label class="radio-item"><input type="radio" name="metode_pembayaran" value="Tunai" checked><span>Tunai</span></label>
+            <label class="radio-item"><input type="radio" name="metode_pembayaran" value="Cicilan 1 tahun"><span>Cicilan 1 tahun</span></label>
+            <label class="radio-item"><input type="radio" name="metode_pembayaran" value="Cicilan 2 tahun"><span>Cicilan 2 tahun</span></label>
+            <label class="radio-item"><input type="radio" name="metode_pembayaran" value="Cicilan 3 tahun"><span>Cicilan 3 tahun</span></label>
+            <label class="radio-item"><input type="radio" name="metode_pembayaran" value="Cicilan 4 tahun"><span>Cicilan 4 tahun</span></label>
+            <label class="radio-item"><input type="radio" name="metode_pembayaran" value="Cicilan 5 tahun"><span>Cicilan 5 tahun</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 14 Estimasi total cicilan -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">14.</div>
+          <div class="field-label">Estimasi total cicilan (Pinjaman Perusahaan, Koperasi dan Kendaraan) saat ini : <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <select name="estimasi_cicilan" required>
+            <option value="">-- Pilih Estimasi --</option>
+            <option>&lt; 50 % Income</option>
+            <option>&gt; 50 % Income</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 15 Tambahan DP -->
+      <div class="field">
+        <div class="field-top">
+          <div class="field-number">15.</div>
+          <div class="field-label">Tambahan DP (IDR) <span class="required-star">*</span></div>
+        </div>
+        <div class="control">
+          <input type="number" name="tambahan_dp" placeholder="Isi 0 jika tidak menambah DP" min="0" step="100000" required>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="reset" class="btn ghost">Reset</button>
+        <button type="submit" class="btn primary">Kirim</button>
+      </div>
+    </form>
+  </div>
+
+<script>
+  // ---------- helper: open native picker if supported ----------
+  function openPicker(fieldName){
+    const el = document.querySelector(`[name="${fieldName}"]`);
+    if (!el) return;
+    if (typeof el.showPicker === 'function'){ el.showPicker(); }
+    else { el.focus(); }
+  }
+
+  // ---------- Nama: hanya huruf & spasi ----------
+  const namaInput = document.getElementById('namaLengkap');
+  const namaError = document.getElementById('namaError');
+
+  namaInput.addEventListener('input', (e) => {
+    const before = e.target.value;
+    const cleaned = before.replace(/[^A-Za-z\u00C0-\u017F\s'-]/g, '');
+    if (before !== cleaned) {
+      const pos = e.target.selectionStart - (before.length - cleaned.length);
+      e.target.value = cleaned;
+      e.target.setSelectionRange(pos,pos);
+    }
+    namaError.classList.remove('show');
+    e.target.setCustomValidity('');
+  });
+
+  namaInput.addEventListener('blur', (e) => {
+    const ok = /^[A-Za-z\u00C0-\u017F\s'-]+$/.test(e.target.value.trim());
+    if (!ok) {
+      namaError.classList.add('show');
+      e.target.setCustomValidity('Hanya huruf dan spasi yang diperbolehkan.');
+    } else {
+      namaError.classList.remove('show');
+      e.target.setCustomValidity('');
+    }
+  });
+
+  namaInput.addEventListener('paste', (ev) => {
+    ev.preventDefault();
+    const text = (ev.clipboardData || window.clipboardData).getData('text');
+    const cleaned = text.replace(/[^A-Za-z\u00C0-\u017F\s'-]/g, '');
+    document.execCommand('insertText', false, cleaned);
+  });
+
+  // ---------- Email: enforce @toyota.co.id ----------
+  const emailInput = document.getElementById('emailField');
+  const emailError = document.getElementById('emailError');
+
+  emailInput.addEventListener('input', (e) => {
+    emailError.classList.remove('show');
+    emailInput.setCustomValidity('');
+  });
+
+  emailInput.addEventListener('blur', (e) => {
+    const val = e.target.value.trim();
+    const re = /^[a-zA-Z0-9._%+\-]+@toyota\.co\.id$/;
+    if (val.length === 0) {
+      emailError.classList.remove('show');
+      e.target.setCustomValidity('');
+      return;
+    }
+    if (!re.test(val)) {
+      emailError.classList.add('show');
+      e.target.setCustomValidity('Email harus berakhiran @toyota.co.id');
+    } else {
+      emailError.classList.remove('show');
+      e.target.setCustomValidity('');
+    }
+  });
+
+  emailInput.addEventListener('paste', (ev) => {
+    ev.preventDefault();
+    const text = (ev.clipboardData || window.clipboardData).getData('text').trim();
+    document.execCommand('insertText', false, text);
+  });
+
+  // ---------- Phone: only digits (0-9) ----------
+  const phoneInput = document.getElementById('phoneField');
+  const phoneError = document.getElementById('phoneError');
+
+  // remove non-digits while typing
+  phoneInput.addEventListener('input', (e) => {
+    const before = e.target.value;
+    const cleaned = before.replace(/\D+/g, ''); // remove non-digits
+    if (before !== cleaned) {
+      const pos = e.target.selectionStart - (before.length - cleaned.length);
+      e.target.value = cleaned;
+      e.target.setSelectionRange(pos,pos);
+    }
+    phoneError.classList.remove('show');
+    e.target.setCustomValidity('');
+  });
+
+  // sanitize pasted content (only digits)
+  phoneInput.addEventListener('paste', (ev) => {
+    ev.preventDefault();
+    const text = (ev.clipboardData || window.clipboardData).getData('text');
+    const cleaned = text.replace(/\D+/g, '');
+    document.execCommand('insertText', false, cleaned);
+  });
+
+  // blur validation (length)
+  phoneInput.addEventListener('blur', (e) => {
+    const v = e.target.value.trim();
+    const ok = /^[0-9]{6,20}$/.test(v);
+    if (!ok) {
+      phoneError.classList.add('show');
+      e.target.setCustomValidity('Nomor telepon harus berisi 6–20 digit (angka saja).');
+    } else {
+      phoneError.classList.remove('show');
+      e.target.setCustomValidity('');
+    }
+  });
+
+  // ---------- Form submit ----------
+  function handleSubmit(e){
+    e.preventDefault();
+    const form = e.target;
+
+    // trigger blur validations
+    namaInput.dispatchEvent(new Event('blur'));
+    emailInput.dispatchEvent(new Event('blur'));
+    phoneInput.dispatchEvent(new Event('blur'));
+
+    // check HTML validity
+    if (!form.checkValidity()){
+      form.reportValidity();
+      return;
+    }
+
+    // retirement must be future
+    const retirement = form.retirement_date.value;
+    if (retirement){
+      const d = new Date(retirement);
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (d <= today){
+        alert('Tanggal pensiun harus di masa depan. Mohon periksa kembali.');
+        return;
+      }
+    }
+
+    // gather data (demo)
+    const data = Object.fromEntries(new FormData(form).entries());
+    console.log('Form data (demo):', data);
+    alert('Form ter-submit (demo).');
+  }
+</script>
+</body>
+</html>
